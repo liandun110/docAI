@@ -7,9 +7,13 @@ const fs = require('fs');
 const axios = require('axios'); // 使用axios发送HTTP请求
 const mammoth = require('mammoth'); // 添加mammoth库
 const standardDocumentsRouter = require('./routes/standardDocuments');
+const aiRouter = require('./routes/ai'); // Import the new AI router
 
 const app = express();
 const port = 5000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // 添加CORS支持
 app.use((req, res, next) => {
@@ -163,6 +167,8 @@ app.post('/api/upload', upload.single('document'), async (req, res) => {
 
 // 使用标准文档路由
 app.use('/api/standards', standardDocumentsRouter);
+// 使用AI功能路由
+app.use('/api/ai', aiRouter);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Backend server running on http://0.0.0.0:${port}`);
