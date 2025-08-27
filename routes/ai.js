@@ -3,7 +3,8 @@ const router = express.Router();
 const axios = require('axios');
 
 // This function should be refactored to be shared across the app
-async function callBailianApplication(prompt) {
+// Modified to accept parameters
+async function callBailianApplication(prompt, parameters = {}) {
     const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
     if (!DASHSCOPE_API_KEY) {
         throw new Error('DASHSCOPE_API_KEY is not set in environment variables.');
@@ -12,9 +13,18 @@ async function callBailianApplication(prompt) {
     const APP_ID = '523cb9ada1d943ba95f71c8122ffaa69'; // Using the same app as in server.js
     const url = `https://dashscope.aliyuncs.com/api/v1/apps/${APP_ID}/completion`;
 
+    // Merge default parameters with passed parameters
+    const defaultParameters = {
+        // Set a higher max_tokens limit for clause generation
+        max_tokens: 1500, // Adjust this value as needed
+        // Optionally, adjust temperature for slightly more deterministic output
+        temperature: 0.7
+    };
+    const mergedParameters = { ...defaultParameters, ...parameters };
+
     const payload = {
         input: { prompt },
-        parameters: {},
+        parameters: mergedParameters, // Use the merged parameters
         debug: {}
     };
 
@@ -63,6 +73,7 @@ router.post('/generate-clause', async (req, res) => {
     }
 
     try {
+        // Call with default parameters set inside the function
         const generatedText = await callBailianApplication(prompt);
         res.json({ generatedText });
     } catch (err) {
