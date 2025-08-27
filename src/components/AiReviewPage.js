@@ -2,6 +2,7 @@ import React from 'react';
 import DocumentUploader from './DocumentUploader';
 import ReviewProgress from './ReviewProgress';
 import ReviewResult from './ReviewResult';
+import './SleekReviewPage.css';
 
 // Main review page component
 function AiReviewPage() {
@@ -26,12 +27,12 @@ function AiReviewPage() {
   };
 
   return (
-    <>
-      <header className="app-header">
+    <div className="sleek-review-page">
+      <header className="sleek-review-header">
         <h1>公安标准智能审核</h1>
         <p>上传案件文书或报告，AI将依据公安标准规范对文档进行审核并给出专业意见</p>
       </header>
-      <main className="app-main">
+      <main className="sleek-review-main">
         {currentStep === 'upload' && (
           <DocumentUploader 
             onUploadStart={handleUploadStart}
@@ -42,12 +43,12 @@ function AiReviewPage() {
         {currentStep === 'progress' && <ReviewProgress />}
         {currentStep === 'result' && <ReviewResult data={reviewData} onReset={() => setCurrentStep('upload')} />}
         {error && currentStep === 'upload' && (
-          <div className="error-message" style={{marginTop: '20px'}}>
+          <div className="sleek-error-message">
             审核失败: {error}
           </div>
         )}
       </main>
-    </>
+    </div>
   );
 }
 

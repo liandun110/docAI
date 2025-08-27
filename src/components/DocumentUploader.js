@@ -106,41 +106,41 @@ const DocumentUploader = ({ onUploadStart, onUploadComplete, onUploadError }) =>
   };
 
   return (
-    <div className="uploader-container">
+    <div className="sleek-uploader-container">
       <div 
-        className={`upload-area ${isDragging ? 'dragging' : ''}`}
+        className={`sleek-upload-area ${isDragging ? 'dragging' : ''}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="upload-content">
-          <div className="upload-icon">📄</div>
-          <p className="upload-text">
+        <div className="sleek-upload-content">
+          <div className="sleek-upload-icon">📄</div>
+          <p className="sleek-upload-text">
             {file ? file.name : '拖拽文件到此处或点击上传'}
           </p>
-          <p className="upload-hint">
+          <p className="sleek-upload-hint">
             支持 PDF, DOC, DOCX, TXT 格式，文件大小不超过10MB
           </p>
           <input 
             type="file" 
             id="file-input"
-            className="file-input"
+            className="sleek-file-input"
             onChange={handleFileInput}
             accept=".pdf,.doc,.docx,.txt"
             disabled={uploading} // 上传时禁用文件选择
           />
-          <label htmlFor="file-input" className="upload-button">
+          <label htmlFor="file-input" className="sleek-upload-button">
             选择文件
           </label>
         </div>
       </div>
       
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="sleek-error-message">{error}</div>}
       
-      <div className="submit-section">
+      <div className="sleek-submit-section">
         <button 
-          className="submit-button"
+          className="sleek-submit-button"
           onClick={handleSubmit}
           disabled={!file || uploading} // 文件未选择或正在上传时禁用按钮
         >

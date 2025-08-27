@@ -13,17 +13,17 @@ const checkKeyToName = {
 const getSeverityClassName = (severity) => {
   switch (severity) {
     case '严重':
-      return 'severity-high';
+      return 'sleek-severity-high';
     case '一般':
-      return 'severity-medium';
+      return 'sleek-severity-medium';
     case '建议':
-      return 'severity-low';
+      return 'sleek-severity-low';
     default:
       return '';
   }
 };
 
-function ReviewResult({ data }) {
+function ReviewResult({ data, onReset }) {
   if (!data) {
     return null;
   }
@@ -38,22 +38,22 @@ function ReviewResult({ data }) {
   } = data;
 
   return (
-    <div className="review-result">
-      <header className="result-header">
+    <div className="sleek-review-result">
+      <header className="sleek-result-header">
         <h2>审核报告: {standard_name}</h2>
-        <div className="standard-meta">
+        <div className="sleek-standard-meta">
           <span><strong>标准类型:</strong> {standard_type}</span>
         </div>
       </header>
 
-      <div className="result-section">
+      <div className="sleek-result-section">
         <h3>总体评估</h3>
         <p>{overall_assessment}</p>
       </div>
 
-      <div className="result-section">
+      <div className="sleek-result-section">
         <h3>详细检查结果</h3>
-        <table className="result-table">
+        <table className="sleek-result-table">
           <thead>
             <tr>
               <th>检查项</th>
@@ -74,9 +74,9 @@ function ReviewResult({ data }) {
       </div>
 
       {issues_and_suggestions && issues_and_suggestions.length > 0 && (
-        <div className="result-section">
+        <div className="sleek-result-section">
           <h3>发现的问题与修改建议</h3>
-          <table className="result-table">
+          <table className="sleek-result-table">
             <thead>
               <tr>
                 <th>条款号</th>
@@ -102,6 +102,12 @@ function ReviewResult({ data }) {
           </table>
         </div>
       )}
+
+      <div className="sleek-result-section">
+        <button className="sleek-reset-button" onClick={onReset}>
+          重新审核
+        </button>
+      </div>
     </div>
   );
 }
