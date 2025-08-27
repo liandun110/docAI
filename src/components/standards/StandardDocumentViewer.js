@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import './DocumentLibrary.css';
 
 function StandardDocumentViewer() {
     const { filename } = useParams();
@@ -31,16 +32,14 @@ function StandardDocumentViewer() {
     const renderContent = () => {
         if (loading) {
             return (
-                <div className="d-flex justify-content-center mt-5">
-                    <div className="spinner-border" style={{ width: '3rem', height: '3rem' }} role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
+                <div className="document-viewer-content-loading">
+                    <div className="document-viewer-spinner"></div>
                 </div>
             );
         }
 
         if (error) {
-            return <div className="alert alert-danger">{error}</div>;
+            return <div className="document-viewer-error">{error}</div>;
         }
 
         if (document.type === 'html') {
@@ -51,15 +50,17 @@ function StandardDocumentViewer() {
     };
 
     return (
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">文档预览</h3>
-                <Link to="/standards" className="btn btn-secondary">返回列表</Link>
+        <div className="document-viewer-container">
+            <div className="document-viewer-header">
+                <h3 className="document-viewer-title">文档预览</h3>
+                <Link to="/standards" className="document-viewer-back-button">返回列表</Link>
             </div>
-            <div className="card p-4">
-                <h5 className="card-title mb-3">{decodeURIComponent(filename)}</h5>
+            <div className="document-viewer-card">
+                <h5 className="document-viewer-filename">{decodeURIComponent(filename)}</h5>
                 <hr/>
-                {renderContent()}
+                <div className="document-viewer-content">
+                    {renderContent()}
+                </div>
             </div>
         </div>
     );

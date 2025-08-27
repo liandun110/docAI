@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import './DocumentLibrary.css';
 
 function StandardDocumentList() {
     const [documents, setDocuments] = useState([]);
@@ -37,30 +38,28 @@ function StandardDocumentList() {
     const renderContent = () => {
         if (loading) {
             return (
-                <div className="d-flex justify-content-center">
-                    <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
+                <div className="document-list-loading">
+                    <div className="document-list-spinner"></div>
                 </div>
             );
         }
 
         if (error) {
-            return <div className="alert alert-danger">{error}</div>;
+            return <div className="document-list-error">{error}</div>;
         }
 
         if (documents.length === 0) {
-            return <p>未找到任何文档。</p>;
+            return <p className="document-list-empty">未找到任何文档。</p>;
         }
 
         return (
-            <ul className="list-group">
+            <ul className="document-list-items">
                 {documents.map(doc => (
-                    <li key={doc} className="list-group-item d-flex justify-content-between align-items-center">
-                        <Link to={`/standards/preview/${encodeURIComponent(doc)}`}>
+                    <li key={doc} className="document-list-item">
+                        <Link to={`/standards/preview/${encodeURIComponent(doc)}`} className="document-list-item-link">
                             {decodeURIComponent(doc)}
                         </Link>
-                        <a href={`/api/standards/${encodeURIComponent(doc)}`} className="btn btn-sm btn-outline-secondary">下载</a>
+                        <a href={`/api/standards/${encodeURIComponent(doc)}`} className="document-list-item-download">下载</a>
                     </li>
                 ))}
             </ul>
@@ -69,20 +68,22 @@ function StandardDocumentList() {
 
     return (
         <div>
-            <h3 className="mb-3">已上传的标准文档</h3>
-            <form onSubmit={handleSearch} className="mb-3">
-                <div className="input-group">
+            <h3 className="document-library-section-title">已上传的标准文档</h3>
+            <div className="document-list-search-container">
+                <form onSubmit={handleSearch} className="document-list-search-form">
                     <input
                         type="text"
-                        className="form-control"
+                        className="document-list-search-input"
                         placeholder="搜索文档..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button className="btn btn-outline-secondary" type="submit">搜索</button>
-                </div>
-            </form>
-            {renderContent()}
+                    <button className="document-list-search-button" type="submit">搜索</button>
+                </form>
+            </div>
+            <div className="document-list-container">
+                {renderContent()}
+            </div>
         </div>
     );
 }

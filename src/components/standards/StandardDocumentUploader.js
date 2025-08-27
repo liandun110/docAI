@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './DocumentLibrary.css';
 
 function StandardDocumentUploader({ onUploadSuccess }) {
     const [file, setFile] = useState(null);
@@ -52,23 +53,31 @@ function StandardDocumentUploader({ onUploadSuccess }) {
 
     return (
         <div>
-            <h3 className="mb-3">上传新的标准文档</h3>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                    <input className="form-control" type="file" onChange={handleFileChange} disabled={uploading} />
+            <h3 className="document-library-section-title">上传新的标准文档</h3>
+            <form onSubmit={handleSubmit} className="document-uploader-form">
+                <div className="document-uploader-input-container">
+                    <input 
+                        className="document-uploader-input" 
+                        type="file" 
+                        onChange={handleFileChange} 
+                        disabled={uploading} 
+                    />
                 </div>
-                <button type="submit" className="btn btn-primary" disabled={uploading}>
+                <button 
+                    type="submit" 
+                    className="document-uploader-button" 
+                    disabled={uploading}
+                >
                     {uploading ? (
-                        <>
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span className="visually-hidden">Loading...</span>
-                            <span style={{marginLeft: '5px'}}>上传中...</span>
-                        </>
+                        <div className="document-uploader-button-loading">
+                            <div className="document-uploader-spinner"></div>
+                            <span>上传中...</span>
+                        </div>
                     ) : '上传'}
                 </button>
             </form>
-            {message && <div className="alert alert-success mt-3">{message}</div>}
-            {error && <div className="alert alert-danger mt-3">{error}</div>}
+            {message && <div className="document-uploader-message document-uploader-message-success">{message}</div>}
+            {error && <div className="document-uploader-message document-uploader-message-error">{error}</div>}
         </div>
     );
 }
