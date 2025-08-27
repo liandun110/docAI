@@ -15,6 +15,7 @@ function StandardDocumentList() {
     const fetchDocuments = async () => {
         setLoading(true);
         setError('');
+        // 对于空搜索词，直接获取所有文档
         const url = searchTerm ? `/api/standards?search=${encodeURIComponent(searchTerm)}` : '/api/standards';
         try {
             const response = await fetch(url);

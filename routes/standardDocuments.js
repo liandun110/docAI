@@ -40,12 +40,21 @@ router.post('/upload', upload.single('document'), async (req, res) => {
 router.get('/', async (req, res) => {
     const { search } = req.query;
     try {
-        let options = {};
+        // 获取所有文件
+        const result = await client.list();
+        let files = result.objects ? result.objects.map(obj => obj.name) : [];
+        
+        // 如果有搜索词，进行过滤
         if (search) {
-            options.prefix = search;
+            // 解码搜索词以正确处理中文
+            const decodedSearch = decodeURIComponent(search);
+            // 过滤包含搜索词的文件（不区分大小写）
+            files = files.filter(file => {
+                const decodedFileName = decodeURIComponent(file);
+                return decodedFileName.toLowerCase().includes(decodedSearch.toLowerCase());
+            });
         }
-        const result = await client.list(options);
-        const files = result.objects ? result.objects.map(obj => obj.name) : [];
+        
         res.json(files);
     } catch (error) {
         console.error('OSS list error:', error);
