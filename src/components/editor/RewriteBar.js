@@ -97,24 +97,10 @@ const RewriteBar = ({ selectedText, position, onClose }) => { // Removed onAccep
                     color: 'white',
                     border: 'none',
                     borderRadius: '3px',
-                    cursor: 'pointer',
-                    marginRight: '10px'
-                }}
-            >
-                {loading ? '重写中...' : '重写'}
-            </button>
-            <button
-                onClick={onClose}
-                style={{
-                    padding: '8px 15px',
-                    backgroundColor: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '3px',
                     cursor: 'pointer'
                 }}
             >
-                取消
+                {loading ? '重写中...' : '重写'}
             </button>
 
             {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
