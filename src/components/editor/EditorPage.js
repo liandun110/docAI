@@ -41,21 +41,7 @@ const AiEditor = () => {
         }
     }, [isRewriteBarActive]); // Add isRewriteBarActive to dependencies
 
-    // NEW: Function to handle text replacement
-    const handleAcceptRewrite = useCallback((rewrittenText) => {
-        if (quillReactRef.current) {
-            const editor = quillReactRef.current.getEditor(); // Get Quill instance
-            const range = editor.getSelection();
-
-            if (range && range.length > 0) {
-                editor.deleteText(range.index, range.length);
-                editor.insertText(range.index, rewrittenText);
-                setEditorHtml(editor.root.innerHTML); // Update ReactQuill's value
-                setShowRewriteBar(false);
-                setIsRewriteBarActive(false); // Deactivate when rewrite is accepted
-            }
-        }
-    }, []);
+    
 
     // NEW: Function to close the rewrite bar
     const handleCloseRewriteBar = useCallback(() => {
@@ -174,8 +160,7 @@ const AiEditor = () => {
                         <RewriteBar
                             selectedText={selectedText}
                             position={selectionPosition}
-                            onAccept={handleAcceptRewrite}
-                            onClose={handleCloseRewriteBar}
+                            onClose={handleCloseRewriteBar} // Removed onAccept
                         />
                     )}
                 </div>

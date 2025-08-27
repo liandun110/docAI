@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios'; // Assuming axios is available for API calls
 
-const RewriteBar = ({ selectedText, position, onAccept, onClose }) => {
+const RewriteBar = ({ selectedText, position, onClose }) => { // Removed onAccept
     const [rewritePrompt, setRewritePrompt] = useState('');
     const [rewrittenText, setRewrittenText] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [copied, setCopied] = useState(false); // NEW: State for copied message
 
     const barRef = useRef(null);
 
@@ -31,6 +32,7 @@ const RewriteBar = ({ selectedText, position, onAccept, onClose }) => {
         setLoading(true);
         setError('');
         setRewrittenText('');
+        setCopied(false); // Reset copied state
 
         try {
             const response = await axios.post('/api/ai/rewrite', {
@@ -43,6 +45,17 @@ const RewriteBar = ({ selectedText, position, onAccept, onClose }) => {
             setError('Failed to rewrite text. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCopy = async () => { // NEW: Copy function
+        try {
+            await navigator.clipboard.writeText(rewrittenText);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000); // Hide "Copied!" after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy text:', err);
+            setError('Failed to copy text to clipboard.');
         }
     };
 
@@ -113,7 +126,7 @@ const RewriteBar = ({ selectedText, position, onAccept, onClose }) => {
                         {rewrittenText}
                     </p>
                     <button
-                        onClick={() => onAccept(rewrittenText)}
+                        onClick={handleCopy} // Changed onClick to handleCopy
                         style={{
                             padding: '8px 15px',
                             backgroundColor: '#28a745',
@@ -123,7 +136,7 @@ const RewriteBar = ({ selectedText, position, onAccept, onClose }) => {
                             cursor: 'pointer'
                         }}
                     >
-                        替换原文
+                        {copied ? '已复制!' : '复制'} {/* Changed button text */}
                     </button>
                 </div>
             )}
