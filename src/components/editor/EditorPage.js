@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // import styles
+import { marked } from 'marked'; // Import marked
 
 const AiEditor = () => {
     const [topic, setTopic] = useState('警用无人机通用技术规范');
@@ -30,9 +31,12 @@ const AiEditor = () => {
 
             const data = await response.json();
             
+            // Convert generated Markdown to HTML
+            const generatedHtml = marked.parse(data.generatedText);
+
             // Append the new content with a title
             const title = `<h3>${getClauseTitle(clauseType)}</h3>`;
-            const newContent = `${editorHtml}${title}${data.generatedText}`;
+            const newContent = `${editorHtml}${title}${generatedHtml}`;
             setEditorHtml(newContent);
 
         } catch (err) {
