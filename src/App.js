@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import DocumentUploader from './components/DocumentUploader';
 import ReviewProgress from './components/ReviewProgress';
 import ReviewResult from './components/ReviewResult';
@@ -9,17 +9,13 @@ import EditorPage from './components/editor/EditorPage'; // Import the editor
 
 import HomePage from './components/HomePage'; // Import the new HomePage
 import AiReviewPage from './components/AiReviewPage'; // Import the extracted AiReviewPage
+import AppleStyleNavbar from './components/AppleStyleNavbar'; // Import the Apple style navbar
 
 function App() {
   return (
     <Router>
       <div className="app">
-        <nav className="main-nav">
-          <NavLink to="/" className={({ isActive }) => isActive ? 'nav-active' : ''}>首页</NavLink>
-          <NavLink to="/review" className={({ isActive }) => isActive ? 'nav-active' : ''}>智能审核</NavLink>
-          <NavLink to="/standards" className={({ isActive }) => isActive ? 'nav-active' : ''}>标准文档库</NavLink>
-          <NavLink to="/editor" className={({ isActive }) => isActive ? 'nav-active' : ''}>智能编写</NavLink>
-        </nav>
+        <AppleStyleNavbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/review" element={<AiReviewPage />} />

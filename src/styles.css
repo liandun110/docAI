@@ -21,6 +21,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  padding-top: 68px; /* 为固定导航栏留出空间 */
 }
 
 /* 头部 */
@@ -368,6 +369,7 @@ body {
 @media (max-width: 768px) {
   .app {
     padding: 10px;
+    padding-top: 68px; /* 为固定导航栏留出空间 */
   }
   
   .app-header h1 {
