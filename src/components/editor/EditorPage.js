@@ -17,6 +17,7 @@ const AiEditor = () => {
     const [selectedText, setSelectedText] = useState('');
     const [selectionPosition, setSelectionPosition] = useState({ top: 0, left: 0 });
     const quillReactRef = useRef(null); // NEW: Ref for ReactQuill
+    const editorContainerRef = useRef(null); // NEW: Ref for editor container
     const [isRewriteBarActive, setIsRewriteBarActive] = useState(false); // NEW: Track if rewrite bar is actively being used
 
     // NEW: Function to handle selection change
@@ -25,10 +26,23 @@ const AiEditor = () => {
             const text = editor.getText(range.index, range.length);
             setSelectedText(text);
 
-            const bounds = editor.getBounds(range.index, range.length);
+            const bounds = editor.getBounds(range.index, range.length); // Bounds relative to editor's content area (ql-editor)
+
+            // Get the bounding rectangle of the ql-editor (Quill's root element)
+            const qlEditorRect = quillReactRef.current.getEditor().root.getBoundingClientRect();
+            // Get the bounding rectangle of the col-md-9 container
+            const containerRect = editorContainerRef.current.getBoundingClientRect();
+
+            // Calculate the position of the selected text relative to the col-md-9 container
+            const relativeLeft = bounds.left + qlEditorRect.left - containerRect.left;
+            const relativeTop = bounds.top + qlEditorRect.top - containerRect.top;
+
+            const containerWidth = editorContainerRef.current ? editorContainerRef.current.getBoundingClientRect().width : 0;
+            const gap = 20; // Desired gap from the right edge of the container
+
             setSelectionPosition({
-                left: bounds.left,
-                top: bounds.top + bounds.height + window.scrollY + 10
+                left: containerWidth + gap, // Position RewriteBar's left edge 20px to the right of container's right edge
+                top: relativeTop - 40 // Position tightly above the text (adjust 40px for bar height)
             });
             setShowRewriteBar(true);
             setIsRewriteBarActive(true); // Set active when bar is shown
@@ -39,7 +53,7 @@ const AiEditor = () => {
                 setSelectedText('');
             }
         }
-    }, [isRewriteBarActive]); // Add isRewriteBarActive to dependencies
+    }, [isRewriteBarActive, editorContainerRef]); // Add isRewriteBarActive and editorContainerRef to dependencies
 
     
 
@@ -142,7 +156,7 @@ const AiEditor = () => {
                 </div>
 
                 {/* Editor */}
-                <div className="col-md-9">
+                <div className="col-md-9" ref={editorContainerRef} style={{ position: 'relative' }}> {/* Added ref and style */}
                     <div className="card">
                         <div className="card-body d-flex flex-column p-0">
                              <ReactQuill 
