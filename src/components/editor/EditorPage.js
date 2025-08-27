@@ -1,14 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react'; // Added useCallback
+import { useParams } from 'react-router-dom';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // import default styles
-import './editorStyles.css'; // Import custom editor styles
-import { marked } from 'marked'; // Import marked
+import 'quill/dist/quill.snow.css';
+import './editorStyles.css';
+import RewriteBar from './RewriteBar'; // NEW: Import RewriteBar
+import { marked } from 'marked'; // NEW: Import marked
 
 const AiEditor = () => {
     const [topic, setTopic] = useState('警用无人机通用技术规范');
     const [editorHtml, setEditorHtml] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // NEW: State for Rewrite Bar
+    const [showRewriteBar, setShowRewriteBar] = useState(false);
+    const [selectedText, setSelectedText] = useState('');
+    const [selectionPosition, setSelectionPosition] = useState({ top: 0, left: 0 });
+    const quillReactRef = useRef(null); // NEW: Ref for ReactQuill
+    const [isRewriteBarActive, setIsRewriteBarActive] = useState(false); // NEW: Track if rewrite bar is actively being used
+
+    // NEW: Function to handle selection change
+    const handleSelectionChange = useCallback((range, source, editor) => {
+        if (range && range.length > 0) {
+            const text = editor.getText(range.index, range.length);
+            setSelectedText(text);
+
+            const bounds = editor.getBounds(range.index, range.length);
+            setSelectionPosition({
+                left: bounds.left,
+                top: bounds.top + bounds.height + window.scrollY + 10
+            });
+            setShowRewriteBar(true);
+            setIsRewriteBarActive(true); // Set active when bar is shown
+        } else {
+            // Only hide if not actively interacting with the bar
+            if (!isRewriteBarActive) {
+                setShowRewriteBar(false);
+                setSelectedText('');
+            }
+        }
+    }, [isRewriteBarActive]); // Add isRewriteBarActive to dependencies
+
+    // NEW: Function to handle text replacement
+    const handleAcceptRewrite = useCallback((rewrittenText) => {
+        if (quillReactRef.current) {
+            const editor = quillReactRef.current.getEditor(); // Get Quill instance
+            const range = editor.getSelection();
+
+            if (range && range.length > 0) {
+                editor.deleteText(range.index, range.length);
+                editor.insertText(range.index, rewrittenText);
+                setEditorHtml(editor.root.innerHTML); // Update ReactQuill's value
+                setShowRewriteBar(false);
+                setIsRewriteBarActive(false); // Deactivate when rewrite is accepted
+            }
+        }
+    }, []);
+
+    // NEW: Function to close the rewrite bar
+    const handleCloseRewriteBar = useCallback(() => {
+        setShowRewriteBar(false);
+        setIsRewriteBarActive(false); // Deactivate when bar is explicitly closed
+    }, []);
 
     const handleGenerateClause = async (clauseType) => {
         if (!topic) {
@@ -107,14 +160,24 @@ const AiEditor = () => {
                     <div className="card">
                         <div className="card-body d-flex flex-column p-0">
                              <ReactQuill 
+                                ref={quillReactRef} // NEW: Ref to ReactQuill
                                 className="flex-grow-1"
                                 theme="snow"
                                 value={editorHtml}
                                 onChange={setEditorHtml}
+                                onChangeSelection={handleSelectionChange} // NEW: Selection change handler
                                 modules={modules}
                             />
                         </div>
                     </div>
+                    {showRewriteBar && selectedText && ( // NEW: Conditionally render RewriteBar
+                        <RewriteBar
+                            selectedText={selectedText}
+                            position={selectionPosition}
+                            onAccept={handleAcceptRewrite}
+                            onClose={handleCloseRewriteBar}
+                        />
+                    )}
                 </div>
             </div>
         </div>

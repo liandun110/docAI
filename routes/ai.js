@@ -81,4 +81,24 @@ router.post('/generate-clause', async (req, res) => {
     }
 });
 
+router.post('/rewrite', async (req, res) => {
+    const { selectedText, rewritePrompt } = req.body;
+
+    if (!selectedText || !rewritePrompt) {
+        return res.status(400).json({ message: 'Selected text and rewrite prompt are required.' });
+    }
+
+    try {
+        // Construct a prompt for the AI service
+        const prompt = `请根据以下要求重写这段文本：\n要求: "${rewritePrompt}"\n原始文本: "${selectedText}"`;
+
+        // Call the AI application
+        const rewrittenText = await callBailianApplication(prompt);
+        res.json({ rewrittenText });
+    } catch (error) {
+        console.error('Error calling AI rewrite service:', error.message);
+        res.status(500).json({ message: 'Failed to get AI rewrite.', error: error.message });
+    }
+});
+
 module.exports = router;
