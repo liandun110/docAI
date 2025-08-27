@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios'; // Assuming axios is available for API calls
+import axios from 'axios';
 
-const RewriteBar = ({ selectedText, position, onClose }) => { // Removed onAccept
+const RewriteBar = ({ selectedText, position, onClose }) => {
     const [rewritePrompt, setRewritePrompt] = useState('');
     const [rewrittenText, setRewrittenText] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [copied, setCopied] = useState(false); // NEW: State for copied message
+    const [copied, setCopied] = useState(false);
 
     const barRef = useRef(null);
 
@@ -25,14 +25,14 @@ const RewriteBar = ({ selectedText, position, onClose }) => { // Removed onAccep
 
     const handleRewrite = async () => {
         if (!selectedText || !rewritePrompt) {
-            setError('Please provide both selected text and a rewrite prompt.');
+            setError('请提供选中的文本和重写要求。');
             return;
         }
 
         setLoading(true);
         setError('');
         setRewrittenText('');
-        setCopied(false); // Reset copied state
+        setCopied(false);
 
         try {
             const response = await axios.post('/api/ai/rewrite', {
@@ -42,87 +42,72 @@ const RewriteBar = ({ selectedText, position, onClose }) => { // Removed onAccep
             setRewrittenText(response.data.rewrittenText);
         } catch (err) {
             console.error('Error rewriting text:', err);
-            setError('Failed to rewrite text. Please try again.');
+            setError('重写文本失败，请重试。');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCopy = async () => { // NEW: Copy function
+    const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(rewrittenText);
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000); // Hide "Copied!" after 2 seconds
+            setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error('Failed to copy text:', err);
-            setError('Failed to copy text to clipboard.');
+            setError('复制文本到剪贴板失败。');
         }
     };
 
     return (
         <div
             ref={barRef}
-            className="rewrite-bar"
-            onMouseDown={(e) => e.stopPropagation()} // NEW: Stop propagation of click events
+            className="smart-editor-rewrite-bar"
+            onMouseDown={(e) => e.stopPropagation()}
             style={{
                 position: 'absolute',
                 left: position.left,
                 top: position.top,
-                // Add more styling here or in CSS
-                background: 'white',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                padding: '10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                zIndex: 1000,
-                minWidth: '300px',
-                maxWidth: '400px'
             }}
         >
             <h3>文本重写</h3>
-            <p>原始文本: "{selectedText.substring(0, 50)}..."</p> {/* Show a snippet */}
+            <p>原始文本: "{selectedText.substring(0, 50)}..."</p>
             <input
                 type="text"
                 placeholder="输入重写要求 (例如: 更简洁, 更正式)"
                 value={rewritePrompt}
                 onChange={(e) => setRewritePrompt(e.target.value)}
-                style={{ width: '100%', padding: '8px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '3px' }}
+                className="smart-editor-rewrite-input"
             />
-            <button
-                onClick={handleRewrite}
-                disabled={loading}
-                style={{
-                    padding: '8px 15px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '3px',
-                    cursor: 'pointer'
-                }}
-            >
-                {loading ? '重写中...' : '重写'}
-            </button>
+            <div className="smart-editor-rewrite-button-group">
+                <button
+                    onClick={handleRewrite}
+                    disabled={loading}
+                    className={`smart-editor-rewrite-button smart-editor-rewrite-button-primary`}
+                >
+                    {loading ? '重写中...' : '重写'}
+                </button>
+                <button
+                    onClick={onClose}
+                    className="smart-editor-rewrite-button smart-editor-rewrite-button-secondary"
+                >
+                    取消
+                </button>
+            </div>
 
-            {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+            {error && <p className="smart-editor-rewrite-error">{error}</p>}
 
             {rewrittenText && (
-                <div style={{ marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                <div className="smart-editor-rewrite-result">
                     <h4>重写结果:</h4>
-                    <p style={{ whiteSpace: 'pre-wrap', background: '#f8f9fa', padding: '10px', borderRadius: '3px' }}>
+                    <p className="smart-editor-rewrite-result-text">
                         {rewrittenText}
                     </p>
                     <button
-                        onClick={handleCopy} // Changed onClick to handleCopy
-                        style={{
-                            padding: '8px 15px',
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '3px',
-                            cursor: 'pointer'
-                        }}
+                        onClick={handleCopy}
+                        className={`smart-editor-rewrite-copy-button ${copied ? 'smart-editor-rewrite-copy-button-copied' : ''}`}
                     >
-                        {copied ? '已复制!' : '复制'} {/* Changed button text */}
+                        {copied ? '已复制!' : '复制'}
                     </button>
                 </div>
             )}
