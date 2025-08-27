@@ -1,0 +1,71 @@
+/* 专门用于 ReactQuill 编辑器的样式 */
+
+/* 编辑器容器 */
+.ql-editor {
+  /* 设置默认字体大小 */
+  font-size: 16px; 
+  /* 设置默认行高 */
+  line-height: 1.6;
+  /* 设置默认字体族 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* 段落文本 */
+.ql-editor p {
+  /* 可以根据需要微调段落样式 */
+  margin-bottom: 1em;
+}
+
+/* 标题样式 */
+.ql-editor h1 {
+  font-size: 2em;     /* 通常约为 32px */
+  font-weight: bold;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h2 {
+  font-size: 1.5em;   /* 通常约为 24px */
+  font-weight: bold;
+  margin-top: 0.75em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h3 {
+  font-size: 1.17em;  /* 通常约为 18.72px */
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h4 {
+  font-size: 1em;     /* 通常约为 16px */
+  font-weight: bold;
+  margin-top: 1.33em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h5 {
+  font-size: 0.83em;  /* 通常约为 13.28px */
+  font-weight: bold;
+  margin-top: 1.67em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h6 {
+  font-size: 0.67em;  /* 通常约为 10.72px */
+  font-weight: bold;
+  margin-top: 2.33em;
+  margin-bottom: 0.5em;
+}
+
+/* 其他内联格式可以在这里添加样式，例如 */
+.ql-editor strong {
+  font-weight: bold;
+}
+
+.ql-editor em {
+  font-style: italic;
+}

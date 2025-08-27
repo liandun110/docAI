@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // import styles
+import 'react-quill/dist/quill.snow.css'; // import default styles
+import './editorStyles.css'; // Import custom editor styles
 import { marked } from 'marked'; // Import marked
 
 const AiEditor = () => {
@@ -57,7 +58,7 @@ const AiEditor = () => {
 
     const modules = {
         toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
+            [{ 'header': [1, 2, 3, 4, 5, false] }],
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
             ['link', 'image'],
