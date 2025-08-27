@@ -104,13 +104,13 @@ const AiEditor = () => {
                 {/* Editor */}
                 <div className="col-md-9">
                     <div className="card">
-                        <div className="card-body">
+                        <div className="card-body d-flex flex-column p-0">
                              <ReactQuill 
+                                className="flex-grow-1"
                                 theme="snow"
                                 value={editorHtml}
                                 onChange={setEditorHtml}
                                 modules={modules}
-                                style={{ height: '60vh' }}
                             />
                         </div>
                     </div>

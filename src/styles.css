@@ -488,3 +488,17 @@ body {
   font-weight: bold;
   background-color: rgba(52, 152, 219, 0.1);
 }
+
+/* Styles for ReactQuill editor in EditorPage */
+.ql-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* This makes the container grow */
+}
+
+.ql-editor {
+  min-height: 50vh; /* This sets a min-height for the editor content area */
+  overflow-y: auto;
+  padding: 15px;
+  flex-grow: 1; /* This makes the editor grow within its flex container */
+}
