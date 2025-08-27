@@ -35,7 +35,8 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // 添加时间戳避免重名
+    // 移除时间戳，直接使用原始文件名
+    cb(null, file.originalname);
   }
 });
 const upload = multer({ storage: storage });

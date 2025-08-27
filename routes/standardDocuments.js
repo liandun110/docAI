@@ -24,7 +24,8 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     try {
         // Fix for garbled Chinese filenames by correcting the encoding
         const originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-        const objectName = `${Date.now()}-${originalname}`;
+        // 移除时间戳，直接使用原始文件名
+        const objectName = originalname;
         
         // Upload the file buffer to OSS
         const result = await client.put(objectName, req.file.buffer);

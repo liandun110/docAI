@@ -90,7 +90,9 @@ router.post('/rewrite', async (req, res) => {
 
     try {
         // Construct a prompt for the AI service
-        const prompt = `请根据以下要求重写这段文本：\n要求: "${rewritePrompt}"\n原始文本: "${selectedText}"`;
+        const prompt = `请根据以下要求重写这段文本：
+要求: "${rewritePrompt}"
+原始文本: "${selectedText}"`;
 
         // Call the AI application
         const rewrittenText = await callBailianApplication(prompt);
@@ -98,6 +100,31 @@ router.post('/rewrite', async (req, res) => {
     } catch (error) {
         console.error('Error calling AI rewrite service:', error.message);
         res.status(500).json({ message: 'Failed to get AI rewrite.', error: error.message });
+    }
+});
+
+// 添加AI聊天API端点
+router.post('/chat', async (req, res) => {
+    const { message } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    try {
+        // 构建聊天提示
+        const prompt = `你是一位专门审核公安技术标准的AI专家，精通中国国家标准（GB）和公安行业标准（GA）的编写规范，特别是GB/T 1.1-2020《标准化工作导则 第1部分：标准化文件的结构和起草规则》。
+        
+用户的问题是：${message}
+        
+请以专业、简洁的方式回答用户的问题。`;
+
+        // 调用AI应用
+        const response = await callBailianApplication(prompt, { max_tokens: 1000 });
+        res.json({ response });
+    } catch (error) {
+        console.error('Error calling AI chat service:', error.message);
+        res.status(500).json({ error: 'Failed to get AI response.', message: error.message });
     }
 });
 

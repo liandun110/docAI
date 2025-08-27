@@ -10,6 +10,7 @@ import EditorPage from './components/editor/EditorPage'; // Import the editor
 import ModernHomepage from './components/ModernHomepage'; // Import the modern homepage
 import AiReviewPage from './components/AiReviewPage'; // Import the extracted AiReviewPage
 import AppleStyleNavbar from './components/AppleStyleNavbar'; // Import the Apple style navbar
+import AiChatBar from './components/AiChatBar'; // Import the AI chat bar
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/standards/preview/:filename" element={<StandardDocumentViewer />} />
           <Route path="/editor" element={<EditorPage />} />
         </Routes>
+        <AiChatBar />
       </div>
     </Router>
   );
