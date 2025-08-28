@@ -69,12 +69,13 @@ router.post('/upload-for-chat', upload.single('document'), async (req, res) => {
     }
 });
 
-// REFACTORED: Chat endpoint now uses file ID
+// REFACTORED: Chat endpoint now uses file ID and chat history for context caching
 router.post('/chat', async (req, res) => {
-    const { message, fileId } = req.body;
+    // Now receiving the whole chat history
+    const { history, fileId } = req.body;
 
-    if (!message) {
-        return res.status(400).json({ error: 'Message is required.' });
+    if (!history || history.length === 0) {
+        return res.status(400).json({ error: 'History is required.' });
     }
 
     const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
@@ -83,18 +84,28 @@ router.post('/chat', async (req, res) => {
     }
 
     try {
+        // Start with the system prompt
         const messages = [
             { "role": "system", "content": "You are a helpful assistant." },
         ];
 
+        // Add fileId context if it exists
         if (fileId) {
             messages.push({ "role": "system", "content": `fileid://${fileId}` });
         }
         
-        messages.push({ "role": "user", "content": message });
+        // Transform and add the chat history from the client
+        history.forEach(message => {
+            if (message.sender === 'user') {
+                messages.push({ role: 'user', content: message.text });
+            } else if (message.sender === 'ai') {
+                messages.push({ role: 'assistant', content: message.text });
+            }
+            // System messages from the client are ignored for the API call
+        });
 
         const payload = {
-            model: "qwen-long",
+            model: "qwen-plus", // Use a model that supports context caching
             messages: messages
         };
 
@@ -105,12 +116,14 @@ router.post('/chat', async (req, res) => {
             }
         });
         
-        // Extract the message content from the response
         const aiResponse = response.data.choices[0].message.content;
-        res.json({ response: aiResponse });
+        // For debugging cache hits
+        const usage = response.data.usage;
+
+        res.json({ response: aiResponse, usage: usage });
 
     } catch (error) {
-        console.error('Error calling qwen-long chat service:', error.response ? error.response.data : error.message);
+        console.error('Error calling qwen-plus chat service:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Failed to get AI response.', details: error.response ? error.response.data : null });
     }
 });
