@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom'; // Import useLocation
 import ReactQuill from 'react-quill';
 import 'quill/dist/quill.snow.css';
 import './SmartEditor.css';
@@ -7,7 +7,22 @@ import RewriteBar from './RewriteBar';
 import { marked } from 'marked';
 
 const AiEditor = () => {
-    const [topic, setTopic] = useState('警用无人机通用技术规范');
+    const location = useLocation();
+    const docType = location.state?.docType;
+
+    // Initial topic calculation (still needed for first render)
+    const getInitialTopic = (currentDocType) => {
+        return currentDocType === 'patent'
+            ? '一种基于AI的智能专利审查系统'
+            : '警用无人机通用技术规范';
+    };
+
+    const [topic, setTopic] = useState(getInitialTopic(docType)); // Initialize with function call
+
+    // Use useEffect to update topic when docType changes
+    useEffect(() => {
+        setTopic(getInitialTopic(docType));
+    }, [docType]); // Dependency array: runs when docType changes
     const [editorHtml, setEditorHtml] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -74,7 +89,7 @@ const AiEditor = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ topic, clauseType }),
+                body: JSON.stringify({ topic, clauseType, docType }), // Pass docType to backend
             });
 
             if (!response.ok) {
@@ -87,7 +102,7 @@ const AiEditor = () => {
             const generatedHtml = marked.parse(data.generatedText);
 
             // Append the new content with a title
-            const title = `<h3>${getClauseTitle(clauseType)}</h3>`;
+            const title = `<h3>${getClauseTitle(clauseType, docType)}</h3>`; // Pass docType to getClauseTitle
             const newContent = `${editorHtml}${title}${generatedHtml}`;
             setEditorHtml(newContent);
 
@@ -97,13 +112,23 @@ const AiEditor = () => {
         setLoading(false);
     };
 
-    const getClauseTitle = (clauseType) => {
-        switch (clauseType) {
-            case 'scope': return '1. 范围';
-            case 'definitions': return '2. 术语和定义';
-            case 'requirements': return '3. 要求';
-            case 'test_methods': return '4. 试验方法';
-            default: return ''
+    const getClauseTitle = (clauseType, currentDocType) => { // Added currentDocType parameter
+        if (currentDocType === 'patent') {
+            switch (clauseType) {
+                case 'scope': return '1. 权利要求'; // Example for patent
+                case 'definitions': return '2. 发明背景';
+                case 'requirements': return '3. 技术方案';
+                case 'test_methods': return '4. 附图说明';
+                default: return '';
+            }
+        } else { // Default for 'gongan' or other types
+            switch (clauseType) {
+                case 'scope': return '1. 范围';
+                case 'definitions': return '2. 术语和定义';
+                case 'requirements': return '3. 要求';
+                case 'test_methods': return '4. 试验方法';
+                default: return '';
+            }
         }
     }
 
@@ -117,17 +142,46 @@ const AiEditor = () => {
         ],
     };
 
+    // Determine the dynamic subtitle based on docType
+    const editorSubtitle = docType === 'patent'
+        ? '从零开始，在AI的辅助下高效创建、起草和编辑您的专利文档'
+        : '从零开始，在AI的辅助下高效创建、起草和编辑您的标准文档';
+
+    // Determine the dynamic topic label
+    const topicLabel = docType === 'patent' ? '专利主题' : '标准主题';
+
+    // Determine dynamic button labels
+    const getButtonLabel = (clauseType) => {
+        if (docType === 'patent') {
+            switch (clauseType) {
+                case 'scope': return '权利要求';
+                case 'definitions': return '发明背景';
+                case 'requirements': return '技术方案';
+                case 'test_methods': return '附图说明';
+                default: return '';
+            }
+        } else { // Default for 'gongan' or other types
+            switch (clauseType) {
+                case 'scope': return '范围';
+                case 'definitions': return '术语和定义';
+                case 'requirements': return '要求';
+                case 'test_methods': return '试验方法';
+                default: return '';
+            }
+        }
+    };
+
     return (
         <div className="smart-editor-container">
             <header className="smart-editor-header">
                 <h1>智能编写工作室</h1>
-                <p>从零开始，在AI的辅助下高效创建、起草和编辑您的标准文档</p>
+                <p>{editorSubtitle}</p> {/* Dynamic subtitle */}
             </header>
             <div className="smart-editor-row">
                 {/* AI Tools Sidebar */}
                 <div className="smart-editor-sidebar">
                     <h5 className="smart-editor-sidebar-title">AI 助手</h5>
-                    <label htmlFor="topicInput" className="smart-editor-topic-label">标准主题</label>
+                    <label htmlFor="topicInput" className="smart-editor-topic-label">{topicLabel}</label> {/* Dynamic label */}
                     <input 
                         type="text" 
                         className="smart-editor-topic-input"
@@ -142,7 +196,7 @@ const AiEditor = () => {
                             className="smart-editor-button" 
                             disabled={loading}
                         >
-                            范围
+                            {getButtonLabel('scope')} {/* Dynamic button text */}
                             {loading && (
                                 <div className="smart-editor-button-loading">
                                     <div className="smart-editor-spinner"></div>
@@ -154,7 +208,7 @@ const AiEditor = () => {
                             className="smart-editor-button" 
                             disabled={loading}
                         >
-                            术语和定义
+                            {getButtonLabel('definitions')} {/* Dynamic button text */}
                             {loading && (
                                 <div className="smart-editor-button-loading">
                                     <div className="smart-editor-spinner"></div>
@@ -166,7 +220,7 @@ const AiEditor = () => {
                             className="smart-editor-button" 
                             disabled={loading}
                         >
-                            要求
+                            {getButtonLabel('requirements')} {/* Dynamic button text */}
                             {loading && (
                                 <div className="smart-editor-button-loading">
                                     <div className="smart-editor-spinner"></div>
@@ -178,7 +232,7 @@ const AiEditor = () => {
                             className="smart-editor-button" 
                             disabled={loading}
                         >
-                            试验方法
+                            {getButtonLabel('test_methods')} {/* Dynamic button text */}
                             {loading && (
                                 <div className="smart-editor-button-loading">
                                     <div className="smart-editor-spinner"></div>
@@ -213,6 +267,6 @@ const AiEditor = () => {
             </div>
         </div>
     );
-}
+};
 
 export default AiEditor;

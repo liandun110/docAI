@@ -110,7 +110,7 @@ const AppleStyleNavbar = () => {
             {isDropdownOpen && (
               <div className="document-type-dropdown" ref={dropdownRef}>
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
                   state={{ docType: 'gongan' }}
@@ -118,7 +118,7 @@ const AppleStyleNavbar = () => {
                   公安标准
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
                   state={{ docType: 'patent' }}
@@ -126,7 +126,7 @@ const AppleStyleNavbar = () => {
                   发明专利
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
                   state={{ docType: 'paper' }}
@@ -192,7 +192,7 @@ const AppleStyleNavbar = () => {
             {isDropdownOpen && ( // Mobile dropdown
               <div className="mobile-document-type-dropdown">
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu} // Close both mobile menu and dropdown
                   state={{ docType: 'gongan' }}
@@ -200,7 +200,7 @@ const AppleStyleNavbar = () => {
                   公安标准
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu}
                   state={{ docType: 'patent' }}
@@ -208,7 +208,7 @@ const AppleStyleNavbar = () => {
                   发明专利
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/editor"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu}
                   state={{ docType: 'paper' }}

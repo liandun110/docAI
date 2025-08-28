@@ -193,28 +193,50 @@ router.post('/chat', async (req, res) => {
 
 // Legacy endpoints below, unchanged as per request
 router.post('/generate-clause', async (req, res) => {
-    const { topic, clauseType } = req.body;
+    const { topic, clauseType, docType } = req.body; // Extract docType
 
     if (!topic || !clauseType) {
         return res.status(400).json({ error: 'Topic and clauseType are required.' });
     }
 
     let prompt;
-    switch (clauseType) {
-        case 'scope':
-            prompt = `你是一位专门编写技术标准的AI专家。请为一个关于“${topic}”的标准，生成“范围”部分的条款内容。内容应简洁、明确，准确界定标准的适用对象和边界。`;
-            break;
-        case 'definitions':
-            prompt = `你是一位专门编写技术标准的AI专家。请为一个关于“${topic}”的标准，生成“术语和定义”部分的条款内容。请列出与该主题相关的核心术语，并给出符合GB/T 1.1规范的定义。`;
-            break;
-        case 'requirements':
-            prompt = `你是一位专门编写技术标准的AI专家。请为一个关于“${topic}”的标准，生成“要求”部分的核心条款内容。请从功能、性能、安全等方面，提出具体、可量化、可验证的技术要求。`;
-            break;
-        case 'test_methods':
-            prompt = `你是一位专门编写技术标准的AI专家。请为一个关于“${topic}”的标准，生成“试验方法”部分的条款内容。内容应与“要求”部分的条款相对应，提供具体、可操作的测试步骤、环境和判定准则。`;
-            break;
-        default:
-            return res.status(400).json({ error: 'Invalid clauseType.' });
+    let aiExpertRole = '你是一位专门编写技术标准的AI专家。从零开始，在AI的辅助下高效创建、起草和编辑您的标准文档'; // Default role
+
+    if (docType === 'patent') {
+        aiExpertRole = '你是一位专门编写专利文档的AI专家。从零开始，在AI的辅助下高效创建、起草和编辑您的专利文档';
+        switch (clauseType) {
+            case 'scope': // Corresponds to '权利要求'
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的专利，生成“权利要求”部分的条款内容。内容应清晰、简洁，准确界定专利的保护范围。`;
+                break;
+            case 'definitions': // Corresponds to '发明背景'
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的专利，生成“发明背景”部分的条款内容。请描述相关技术领域，并指出现有技术的不足。`;
+                break;
+            case 'requirements': // Corresponds to '技术方案'
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的专利，生成“技术方案”部分的核心条款内容。请详细描述本发明的技术特征、实现方式和有益效果。`;
+                break;
+            case 'test_methods': // Corresponds to '附图说明'
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的专利，生成“附图说明”部分的条款内容。请简要描述附图所示内容，并指出各附图标记代表的含义。`;
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid clauseType for patent.' });
+        }
+    } else { // Default for 'gongan' or other types
+        switch (clauseType) {
+            case 'scope':
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的标准，生成“范围”部分的条款内容。内容应简洁、明确，准确界定标准的适用对象和边界。`;
+                break;
+            case 'definitions':
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的标准，生成“术语和定义”部分的条款内容。请列出与该主题相关的核心术语，并给出符合GB/T 1.1规范的定义。`;
+                break;
+            case 'requirements':
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的标准，生成“要求”部分的核心条款内容。请从功能、性能、安全等方面，提出具体、可量化、可验证的技术要求。`;
+                break;
+            case 'test_methods':
+                prompt = `${aiExpertRole}请为一个关于“${topic}”的标准，生成“试验方法”部分的条款内容。内容应与“要求”部分的条款相对应，提供具体、可操作的测试步骤、环境和判定准则。`;
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid clauseType.' });
+        }
     }
 
     try {
