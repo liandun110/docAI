@@ -193,12 +193,48 @@
 }
 
 /* 输入区域 */
+.ai-chat-input-section {
+  border-top: 1px solid #e0e0e0;
+  background: #f9f9f9;
+}
+
+.ai-chat-file-attachment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 15px;
+  background-color: #e9e9eb;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 5px;
+}
+
+.remove-file-btn:hover {
+  color: #333;
+}
+
 .ai-chat-input-container {
   display: flex;
-  padding: 15px;
+  padding: 10px 15px;
   border-top: 1px solid #e0e0e0;
   background: white;
   gap: 10px;
+  align-items: center;
 }
 
 .ai-chat-input {
@@ -218,18 +254,23 @@
   box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
 }
 
+.ai-chat-attach-button,
 .ai-chat-send-button {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #0071e3;
-  color: white;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ai-chat-send-button {
+  background: #0071e3;
+  color: white;
 }
 
 .ai-chat-send-button:hover:not(:disabled) {
@@ -241,6 +282,55 @@
   background: #d2d2d7;
   cursor: not-allowed;
   transform: none;
+}
+
+.ai-chat-attach-button {
+  background: none;
+  color: #86868b;
+}
+
+.ai-chat-attach-button:hover:not(:disabled) {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.ai-chat-attach-button:disabled {
+  color: #d2d2d7;
+  cursor: not-allowed;
+}
+
+/* Loader for upload button */
+.ai-chat-loader {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #86868b;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* System message style */
+.ai-chat-message.system {
+  align-self: center;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #86868b;
+  width: 100%;
+}
+
+.ai-chat-message.system .ai-chat-message-content {
+  background: none;
+  padding: 4px 8px;
+}
+
+.ai-chat-message.system.error .ai-chat-message-content {
+    color: #d93025;
+    font-weight: 500;
 }
 
 /* 响应式设计 */

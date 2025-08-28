@@ -1,32 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const multer = require('multer');
+const FormData = require('form-data');
+const fs = require('fs');
 
-// This function should be refactored to be shared across the app
-// Modified to accept parameters
+// Configure multer for temporary in-memory storage
+const upload = multer({ storage: multer.memoryStorage() });
+
+// This function remains for legacy features like generate-clause and rewrite
 async function callBailianApplication(prompt, parameters = {}) {
     const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
     if (!DASHSCOPE_API_KEY) {
         throw new Error('DASHSCOPE_API_KEY is not set in environment variables.');
     }
-
-    const APP_ID = '523cb9ada1d943ba95f71c8122ffaa69'; // Using the same app as in server.js
+    const APP_ID = '523cb9ada1d943ba95f71c8122ffaa69';
     const url = `https://dashscope.aliyuncs.com/api/v1/apps/${APP_ID}/completion`;
-
-    // Merge default parameters with passed parameters
-    const defaultParameters = {
-        // Set a higher max_tokens limit for clause generation
-        max_tokens: 1500, // Adjust this value as needed
-        // Optionally, adjust temperature for slightly more deterministic output
-        temperature: 0.7
-    };
+    const defaultParameters = { max_tokens: 1500, temperature: 0.7 };
     const mergedParameters = { ...defaultParameters, ...parameters };
-
-    const payload = {
-        input: { prompt },
-        parameters: mergedParameters, // Use the merged parameters
-        debug: {}
-    };
+    const payload = { input: { prompt }, parameters: mergedParameters, debug: {} };
 
     try {
         const response = await axios.post(url, payload, {
@@ -37,16 +29,97 @@ async function callBailianApplication(prompt, parameters = {}) {
         });
         return response.data.output.text;
     } catch (error) {
-        console.error('调用百炼应用时出错:');
-        if (error.response) {
-            console.error('Status:', error.response.status);
-            console.error('Data:', error.response.data);
-        }
+        console.error('调用百炼应用时出错:', error.response ? error.response.data : error.message);
         throw error;
     }
 }
 
+// --- Start of Refactoring for File ID based conversation ---
 
+// NEW: Endpoint to upload a file and get a file ID
+router.post('/upload-for-chat', upload.single('document'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded.' });
+    }
+
+    const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
+    if (!DASHSCOPE_API_KEY) {
+        return res.status(500).json({ error: 'DASHSCOPE_API_KEY is not set.' });
+    }
+
+    try {
+        const form = new FormData();
+        // Use the buffer from multer's memory storage
+        form.append('file', req.file.buffer, req.file.originalname);
+        form.append('purpose', 'file-extract');
+
+        const response = await axios.post('https://dashscope.aliyuncs.com/compatible-mode/v1/files', form, {
+            headers: {
+                ...form.getHeaders(),
+                'Authorization': `Bearer ${DASHSCOPE_API_KEY}`
+            }
+        });
+
+        // Return the file ID from the response
+        res.json({ fileId: response.data.id });
+
+    } catch (error) {
+        console.error('Error uploading file to Aliyun for chat:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to upload file and get file ID.' });
+    }
+});
+
+// REFACTORED: Chat endpoint now uses file ID
+router.post('/chat', async (req, res) => {
+    const { message, fileId } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
+    if (!DASHSCOPE_API_KEY) {
+        return res.status(500).json({ error: 'DASHSCOPE_API_KEY is not set.' });
+    }
+
+    try {
+        const messages = [
+            { "role": "system", "content": "You are a helpful assistant." },
+        ];
+
+        if (fileId) {
+            messages.push({ "role": "system", "content": `fileid://${fileId}` });
+        }
+        
+        messages.push({ "role": "user", "content": message });
+
+        const payload = {
+            model: "qwen-long",
+            messages: messages
+        };
+
+        const response = await axios.post('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', payload, {
+            headers: {
+                'Authorization': `Bearer ${DASHSCOPE_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        // Extract the message content from the response
+        const aiResponse = response.data.choices[0].message.content;
+        res.json({ response: aiResponse });
+
+    } catch (error) {
+        console.error('Error calling qwen-long chat service:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to get AI response.', details: error.response ? error.response.data : null });
+    }
+});
+
+
+// --- End of Refactoring ---
+
+
+// Legacy endpoints below, unchanged as per request
 router.post('/generate-clause', async (req, res) => {
     const { topic, clauseType } = req.body;
 
@@ -73,7 +146,6 @@ router.post('/generate-clause', async (req, res) => {
     }
 
     try {
-        // Call with default parameters set inside the function
         const generatedText = await callBailianApplication(prompt);
         res.json({ generatedText });
     } catch (err) {
@@ -89,42 +161,14 @@ router.post('/rewrite', async (req, res) => {
     }
 
     try {
-        // Construct a prompt for the AI service
         const prompt = `请根据以下要求重写这段文本：
 要求: "${rewritePrompt}"
 原始文本: "${selectedText}"`;
-
-        // Call the AI application
         const rewrittenText = await callBailianApplication(prompt);
         res.json({ rewrittenText });
     } catch (error) {
         console.error('Error calling AI rewrite service:', error.message);
         res.status(500).json({ message: 'Failed to get AI rewrite.', error: error.message });
-    }
-});
-
-// 添加AI聊天API端点
-router.post('/chat', async (req, res) => {
-    const { message } = req.body;
-
-    if (!message) {
-        return res.status(400).json({ error: 'Message is required.' });
-    }
-
-    try {
-        // 构建聊天提示
-        const prompt = `你是一位专门审核公安技术标准的AI专家，精通中国国家标准（GB）和公安行业标准（GA）的编写规范，特别是GB/T 1.1-2020《标准化工作导则 第1部分：标准化文件的结构和起草规则》。
-        
-用户的问题是：${message}
-        
-请以专业、简洁的方式回答用户的问题。`;
-
-        // 调用AI应用
-        const response = await callBailianApplication(prompt, { max_tokens: 1000 });
-        res.json({ response });
-    } catch (error) {
-        console.error('Error calling AI chat service:', error.message);
-        res.status(500).json({ error: 'Failed to get AI response.', message: error.message });
     }
 });
 
