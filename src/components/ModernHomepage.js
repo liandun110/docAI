@@ -1,10 +1,30 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation
 import './ModernHomepage.css';
 
 function ModernHomepage() {
+    const location = useLocation(); // Get the location object
+    const docType = location.state?.docType; // Extract docType from state
+
+    // Helper function to get display name for docType
+    const getDocTypeDisplayName = (type) => {
+        switch (type) {
+            case 'gongan':
+                return '公安标准';
+            case 'patent':
+                return '发明专利';
+            case 'paper':
+                return '科技论文';
+            default:
+                return '未选择'; // Or a default type if none is selected
+        }
+    };
+
     return (
         <div className="modern-homepage">
+            {/* Display the selected document type */}
+            
+
             {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content">

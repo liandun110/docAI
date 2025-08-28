@@ -189,6 +189,114 @@
   font-weight: 500;
 }
 
+/* Action Buttons */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-button, .user-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.search-button:hover, .user-button:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile Menu Button */
+.menu-button {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.menu-button span {
+  width: 100%;
+  height: 2px;
+  background: #000;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  transform-origin: 5px 1px;
+  opacity: 0.8;
+}
+
+.menu-button.active span:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.menu-button.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-button.active span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  height: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+  transition: height 0.3s ease;
+  z-index: 999;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu.open {
+  height: calc(100vh - 48px);
+}
+
+.mobile-menu-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100%;
+}
+
+.mobile-nav-link {
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+  text-decoration: none;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mobile-nav-link:last-child {
+  border-bottom: none;
+}
+
+.mobile-nav-link.active {
+  font-weight: 500;
+}
+
+/* Mobile Menu Actions */
 .mobile-menu-actions {
   display: flex;
   flex-direction: column;
@@ -214,23 +322,75 @@
   opacity: 1;
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .navbar-links {
-    display: none;
-  }
-  
-  .menu-button {
-    display: flex;
-  }
-  
-  .navbar-container {
-    padding: 0 15px;
-  }
+/* Document Type Dropdown Styles */
+.document-type-dropdown {
+  position: absolute;
+  top: calc(100% + 10px); /* Position below the button */
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95); /* Match navbar scrolled background */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px 0;
+  z-index: 1000;
+  min-width: 140px; /* Adjust width as needed */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Ensures border-radius applies to children */
 }
 
-@media (min-width: 769px) {
-  .mobile-menu {
-    display: none;
-  }
+.dropdown-item {
+  display: block;
+  padding: 8px 15px;
+  color: #000; /* Match nav-link color */
+  text-decoration: none;
+  font-size: 14px; /* Match nav-link font size */
+  font-weight: 400;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05); /* Match search/user button hover */
+}
+
+.dropdown-item.active {
+  opacity: 1;
+  font-weight: 500; /* Match nav-link active */
+}
+
+/* Mobile Document Type Dropdown Styles */
+.mobile-document-type-dropdown {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05); /* Separator from other mobile actions */
+  padding-top: 10px;
+}
+
+.mobile-dropdown-item {
+  font-size: 18px; /* Slightly smaller than mobile-nav-link for hierarchy */
+  font-weight: 400;
+  color: #000;
+  text-decoration: none;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-dropdown-item.active {
+  font-weight: 500;
+  opacity: 1;
+}
+
+.mobile-dropdown-item:hover {
+  opacity: 1;
 }
