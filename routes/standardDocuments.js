@@ -39,11 +39,30 @@ router.post('/upload', upload.single('document'), async (req, res) => {
 
 // GET /api/standards - Get list of documents from OSS
 router.get('/', async (req, res) => {
-    const { search } = req.query;
+    const { search, role } = req.query;
     try {
         // 获取所有文件
         const result = await client.list();
         let files = result.objects ? result.objects.map(obj => obj.name) : [];
+        
+        // 如果有角色参数，进行过滤
+        if (role) {
+            // 根据角色过滤文件
+            files = files.filter(file => {
+                const decodedFileName = decodeURIComponent(file);
+                // 角色与文件名前缀匹配
+                switch (role) {
+                    case 'patent':
+                        return decodedFileName.includes('专利') || decodedFileName.includes('发明');
+                    case 'gongan':
+                        return decodedFileName.includes('公安') || decodedFileName.includes('标准');
+                    case 'paper':
+                        return decodedFileName.includes('论文') || decodedFileName.includes('科技');
+                    default:
+                        return true;
+                }
+            });
+        }
         
         // 如果有搜索词，进行过滤
         if (search) {

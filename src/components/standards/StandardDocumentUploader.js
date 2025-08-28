@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import './DocumentLibrary.css';
 
 function StandardDocumentUploader({ onUploadSuccess }) {
@@ -6,6 +7,10 @@ function StandardDocumentUploader({ onUploadSuccess }) {
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
+    const location = useLocation();
+    
+    // 从URL state获取角色信息
+    const role = location.state?.role || 'gongan'; // 默认为公安标准
 
     const handleFileChange = (event) => {
         setFile(event.target.files[0]);
@@ -20,12 +25,24 @@ function StandardDocumentUploader({ onUploadSuccess }) {
             return;
         }
 
+        // 根据角色修改文件名前缀
+        let fileName = file.name;
+        if (role === 'patent' && !fileName.includes('专利') && !fileName.includes('发明')) {
+            fileName = `专利_${fileName}`;
+        } else if (role === 'gongan' && !fileName.includes('公安') && !fileName.includes('标准')) {
+            fileName = `公安标准_${fileName}`;
+        } else if (role === 'paper' && !fileName.includes('论文') && !fileName.includes('科技')) {
+            fileName = `科技论文_${fileName}`;
+        }
+
         setUploading(true);
         setMessage('');
         setError('');
 
         const formData = new FormData();
-        formData.append('document', file);
+        // 如果文件名需要修改，创建一个新的File对象
+        const fileToUpload = fileName !== file.name ? new File([file], fileName, { type: file.type }) : file;
+        formData.append('document', fileToUpload);
 
         try {
             const response = await fetch('/api/standards/upload', {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './DocumentLibrary.css';
 
 function StandardDocumentList() {
@@ -7,16 +7,25 @@ function StandardDocumentList() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const location = useLocation();
+    
+    // 从URL state获取角色信息
+    const role = location.state?.role || 'gongan'; // 默认为公安标准
 
     useEffect(() => {
         fetchDocuments();
-    }, []);
+    }, [role]);
 
     const fetchDocuments = async () => {
         setLoading(true);
         setError('');
-        // 对于空搜索词，直接获取所有文档
-        const url = searchTerm ? `/api/standards?search=${encodeURIComponent(searchTerm)}` : '/api/standards';
+        // 构建URL参数
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('search', searchTerm);
+        params.append('role', role);
+        
+        const url = `/api/standards?${params.toString()}`;
+        
         try {
             const response = await fetch(url);
             if (!response.ok) {

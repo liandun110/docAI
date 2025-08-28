@@ -110,26 +110,26 @@ const AppleStyleNavbar = () => {
             {isDropdownOpen && (
               <div className="document-type-dropdown" ref={dropdownRef}>
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
-                  state={{ docType: 'gongan' }}
+                  state={{ role: 'gongan' }}
                 >
                   公安标准
                 </NavLink>
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
-                  state={{ docType: 'patent' }}
+                  state={{ role: 'patent' }}
                 >
                   发明专利
                 </NavLink>
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeDropdown}
-                  state={{ docType: 'paper' }}
+                  state={{ role: 'paper' }}
                 >
                   科技论文
                 </NavLink>
@@ -192,26 +192,26 @@ const AppleStyleNavbar = () => {
             {isDropdownOpen && ( // Mobile dropdown
               <div className="mobile-document-type-dropdown">
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu} // Close both mobile menu and dropdown
-                  state={{ docType: 'gongan' }}
+                  state={{ role: 'gongan' }}
                 >
                   公安标准
                 </NavLink>
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu}
-                  state={{ docType: 'patent' }}
+                  state={{ role: 'patent' }}
                 >
                   发明专利
                 </NavLink>
                 <NavLink
-                  to="/editor"
+                  to="/standards"
                   className={({ isActive }) => `mobile-dropdown-item ${isActive ? 'active' : ''}`}
                   onClick={closeMenu}
-                  state={{ docType: 'paper' }}
+                  state={{ role: 'paper' }}
                 >
                   科技论文
                 </NavLink>
