@@ -9,6 +9,9 @@ const AiChatBar = () => {
   const [isUploading, setIsUploading] = useState(false); // For file upload
   const [fileId, setFileId] = useState(null); // To store the uploaded file ID
   const [fileName, setFileName] = useState(''); // To display the uploaded file name
+  const [ossFiles, setOssFiles] = useState([]); // To store the list of OSS files
+  const [isOssModalOpen, setIsOssModalOpen] = useState(false); // To control the OSS file selection modal
+  const [isFetchingOssFiles, setIsFetchingOssFiles] = useState(false); // Loading state for fetching OSS files
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null); // Ref for the hidden file input
@@ -87,6 +90,71 @@ const AiChatBar = () => {
       text: `已移除文件上下文。`,
       sender: 'system'
     }]);
+  };
+
+  // NEW: Fetch list of files from OSS
+  const fetchOssFiles = async () => {
+    setIsFetchingOssFiles(true);
+    try {
+      const response = await fetch('/api/ai/list-oss-files');
+      if (!response.ok) {
+        throw new Error('Failed to fetch OSS files');
+      }
+      const files = await response.json();
+      setOssFiles(files);
+    } catch (error) {
+      console.error('Error fetching OSS files:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        text: `获取OSS文件列表失败: ${error.message}`,
+        sender: 'system',
+        isError: true
+      }]);
+    } finally {
+      setIsFetchingOssFiles(false);
+    }
+  };
+
+  // NEW: Handle selection of an OSS file
+  const handleSelectOssFile = async (filename) => {
+    setIsOssModalOpen(false); // Close the modal
+    setIsUploading(true); // Reuse the uploading state for visual feedback
+    setFileName(filename); // Temporarily show the filename
+
+    try {
+      const response = await fetch('/api/ai/select-oss-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filename }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setFileId(data.fileId); // Set the BaiLian fileId
+      setFileName(data.filename); // Ensure filename is set (should be the same)
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        text: `OSS文件 "${data.filename}" 已选择并处理完成，现在可以开始提问了。`,
+        sender: 'system'
+      }]);
+    } catch (error) {
+      console.error('Error selecting OSS file:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        text: `选择OSS文件 "${filename}" 失败: ${error.message}`,
+        sender: 'system',
+        isError: true
+      }]);
+      setFileName(''); // Clear filename on error
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -171,9 +239,27 @@ const AiChatBar = () => {
             )}
             <div className="ai-chat-input-container">
               <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept=".txt,.pdf,.docx,.md" />
-              <button className="ai-chat-attach-button" onClick={() => fileInputRef.current.click()} disabled={isLoading || isUploading || fileId} aria-label="上传文件">
-                {isUploading ? <div className="ai-chat-loader"></div> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.58 16.09l-1.18-1.18-1.96-1.96c-.39-.39-1.02-.39-1.41 0L16 14.05l-4.95-4.95 1.1-1.1c.39-.39.39-1.02 0-1.41L10.18 4.6c-.39-.39-1.02-.39-1.41 0L2.42 10.95c-.39.39-.39 1.02 0 1.41l1.96 1.96 1.18 1.18c.39.39 1.02.39 1.41 0l1.1-1.1 4.95 4.95-1.1 1.1c-.39.39-.39 1.02 0 1.41l1.96 1.96c.39.39 1.02.39 1.41 0l6.36-6.36c.39-.39.39-1.03 0-1.42z" fill="currentColor"/></svg>}
-              </button>
+              {/* NEW: Container for both attach buttons */}
+              <div className="ai-chat-attach-button-group">
+                <button 
+                  className="ai-chat-attach-button" 
+                  onClick={() => fileInputRef.current.click()} 
+                  disabled={isLoading || isUploading || fileId} 
+                  aria-label="上传本地文件"
+                  title="上传本地文件"
+                >
+                  {isUploading ? <div className="ai-chat-loader"></div> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.58 16.09l-1.18-1.18-1.96-1.96c-.39-.39-1.02-.39-1.41 0L16 14.05l-4.95-4.95 1.1-1.1c.39-.39.39-1.02 0-1.41L10.18 4.6c-.39-.39-1.02-.39-1.41 0L2.42 10.95c-.39.39-.39 1.02 0 1.41l1.96 1.96 1.18 1.18c.39.39 1.02.39 1.41 0l1.1-1.1 4.95 4.95-1.1 1.1c-.39.39-.39 1.02 0 1.41l1.96 1.96c.39.39 1.02.39 1.41 0l6.36-6.36c.39-.39.39-1.03 0-1.42z" fill="currentColor"/></svg>}
+                </button>
+                <button 
+                  className="ai-chat-attach-button ai-chat-oss-button" 
+                  onClick={() => { setIsOssModalOpen(true); fetchOssFiles(); }} 
+                  disabled={isLoading || isUploading || fileId} 
+                  aria-label="从OSS选择文件"
+                  title="从OSS选择文件"
+                >
+                  {isFetchingOssFiles ? <div className="ai-chat-loader"></div> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" fill="currentColor"/></svg>}
+                </button>
+              </div>
               <textarea
                 className="ai-chat-input"
                 value={inputValue}
@@ -186,6 +272,38 @@ const AiChatBar = () => {
               <button className="ai-chat-send-button" onClick={handleSubmit} disabled={!inputValue.trim() || isLoading || isUploading} aria-label="发送消息">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor"/></svg>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NEW: Modal for selecting OSS files */}
+      {isOssModalOpen && (
+        <div className="ai-chat-oss-modal-overlay">
+          <div className="ai-chat-oss-modal">
+            <div className="ai-chat-oss-modal-header">
+              <h3>选择OSS文件</h3>
+              <button className="ai-chat-oss-modal-close" onClick={() => setIsOssModalOpen(false)} aria-label="关闭">×</button>
+            </div>
+            <div className="ai-chat-oss-modal-content">
+              {isFetchingOssFiles ? (
+                <div className="ai-chat-oss-loading">正在加载文件列表...</div>
+              ) : ossFiles.length > 0 ? (
+                <ul className="ai-chat-oss-file-list">
+                  {ossFiles.map((file, index) => (
+                    <li key={index} className="ai-chat-oss-file-item">
+                      <button 
+                        className="ai-chat-oss-file-button"
+                        onClick={() => handleSelectOssFile(file)}
+                      >
+                        {file}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>暂无可用文件。</p>
+              )}
             </div>
           </div>
         </div>

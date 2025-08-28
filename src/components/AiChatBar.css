@@ -254,6 +254,19 @@
   box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
 }
 
+/* Group container for attach buttons */
+.ai-chat-attach-button-group {
+  display: flex;
+  gap: 5px; /* Add some space between the buttons */
+}
+
+/* Specific style for the OSS button to differentiate it */
+.ai-chat-oss-button {
+  /* You can add specific styles here if needed, e.g., a different background on hover */
+  /* For now, it inherits most styles from .ai-chat-attach-button */
+}
+
+
 .ai-chat-attach-button,
 .ai-chat-send-button {
   width: 40px;
@@ -361,4 +374,113 @@
     width: 280px;
     height: 350px;
   }
+}
+
+/* --- NEW STYLES FOR OSS FILE SELECTION --- */
+
+
+/* Overlay for the modal */
+.ai-chat-oss-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+/* Modal container */
+.ai-chat-oss-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal header */
+.ai-chat-oss-modal-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-chat-oss-modal-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+/* Close button in modal header */
+.ai-chat-oss-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.ai-chat-oss-modal-close:hover {
+  background-color: #f0f0f0;
+}
+
+/* Modal content area */
+.ai-chat-oss-modal-content {
+  padding: 15px;
+  overflow-y: auto; /* Allow scrolling if list is long */
+  flex-grow: 1;
+}
+
+/* Loading text */
+.ai-chat-oss-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* File list */
+.ai-chat-oss-file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* File list item */
+.ai-chat-oss-file-item {
+  margin-bottom: 8px;
+}
+
+/* Button for each file */
+.ai-chat-oss-file-button {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-chat-oss-file-button:hover {
+  background-color: #e9e9e9;
+  border-color: #bbb;
 }

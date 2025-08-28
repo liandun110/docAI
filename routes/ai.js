@@ -4,9 +4,18 @@ const axios = require('axios');
 const multer = require('multer');
 const FormData = require('form-data');
 const fs = require('fs');
+const OSS = require('ali-oss');
 
 // Configure multer for temporary in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Initialize OSS client from .env variables (Reusing logic from standardDocuments.js)
+const ossClient = new OSS({
+    region: process.env.OSS_REGION,
+    accessKeyId: process.env.OSS_ACCESS_KEY_ID,
+    accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET,
+    bucket: process.env.OSS_BUCKET,
+});
 
 // This function remains for legacy features like generate-clause and rewrite
 async function callBailianApplication(prompt, parameters = {}) {
@@ -66,6 +75,63 @@ router.post('/upload-for-chat', upload.single('document'), async (req, res) => {
     } catch (error) {
         console.error('Error uploading file to Aliyun for chat:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Failed to upload file and get file ID.' });
+    }
+});
+
+// NEW: Endpoint to list files from OSS for AI chat selection
+router.get('/list-oss-files', async (req, res) => {
+    try {
+        // Reuse logic from standardDocuments.js to list files
+        const result = await ossClient.list();
+        const files = result.objects ? result.objects.map(obj => obj.name) : [];
+        res.json(files);
+    } catch (error) {
+        console.error('OSS list error (for AI):', error);
+        res.status(500).json({ error: 'Unable to list files from OSS for AI.' });
+    }
+});
+
+// NEW: Endpoint to select an OSS file and get a BaiLian file ID
+router.post('/select-oss-file', async (req, res) => {
+    const { filename } = req.body; // Filename selected from OSS
+
+    if (!filename) {
+        return res.status(400).json({ error: 'Filename is required.' });
+    }
+
+    const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
+    if (!DASHSCOPE_API_KEY) {
+        return res.status(500).json({ error: 'DASHSCOPE_API_KEY is not set.' });
+    }
+
+    try {
+        // 1. Download the file content from OSS
+        const ossResult = await ossClient.get(filename);
+        const fileBuffer = ossResult.content; // This is the file's Buffer
+
+        // 2. Upload the file buffer to BaiLian to get a fileId
+        const form = new FormData();
+        form.append('file', fileBuffer, filename); // Use the original filename
+        form.append('purpose', 'file-extract');
+
+        const response = await axios.post('https://dashscope.aliyuncs.com/compatible-mode/v1/files', form, {
+            headers: {
+                ...form.getHeaders(),
+                'Authorization': `Bearer ${DASHSCOPE_API_KEY}`
+            }
+        });
+
+        // 3. Return the BaiLian fileId and the original filename
+        res.json({ fileId: response.data.id, filename: filename });
+
+    } catch (error) {
+        console.error('Error selecting OSS file for chat:', error);
+        // Differentiate between OSS errors and BaiLian upload errors
+        if (error.code === 'NoSuchKey') {
+             res.status(404).json({ error: 'File not found in OSS.' });
+        } else {
+             res.status(500).json({ error: 'Failed to process selected OSS file for chat.' });
+        }
     }
 });
 
