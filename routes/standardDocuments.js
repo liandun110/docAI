@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const mammoth = require('mammoth');
 const OSS = require('ali-oss');
+const fs = require('fs');
+const path = require('path');
 
 // Initialize OSS client from .env variables
 const client = new OSS({
@@ -27,6 +29,19 @@ router.post('/upload', upload.single('document'), async (req, res) => {
         // 移除时间戳，直接使用原始文件名
         const objectName = originalname;
         
+        // Define local backup path
+        const localBackupDir = path.join(__dirname, '..', 'standard_documents'); // Adjust path as needed
+        const localBackupPath = path.join(localBackupDir, objectName);
+
+        // Ensure the local backup directory exists
+        if (!fs.existsSync(localBackupDir)) {
+            fs.mkdirSync(localBackupDir, { recursive: true });
+        }
+
+        // Save a local backup
+        await fs.promises.writeFile(localBackupPath, req.file.buffer);
+        console.log(`Local backup saved: ${localBackupPath}`);
+
         // Upload the file buffer to OSS
         const result = await client.put(objectName, req.file.buffer);
 
