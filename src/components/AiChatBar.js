@@ -106,7 +106,7 @@ const AiChatBar = () => {
           'Content-Type': 'application/json',
         },
         // Include fileId if it exists
-        body: JSON.stringify({ message: userMessage, fileId }),
+        body: JSON.stringify({ conversationHistory: newMessages, fileId }),
       });
 
       if (!response.ok) {

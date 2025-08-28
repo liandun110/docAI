@@ -71,10 +71,10 @@ router.post('/upload-for-chat', upload.single('document'), async (req, res) => {
 
 // REFACTORED: Chat endpoint now uses file ID
 router.post('/chat', async (req, res) => {
-    const { message, fileId } = req.body;
+    const { conversationHistory, fileId } = req.body;
 
-    if (!message) {
-        return res.status(400).json({ error: 'Message is required.' });
+    if (!conversationHistory || !Array.isArray(conversationHistory) || conversationHistory.length === 0) {
+        return res.status(400).json({ error: 'Conversation history is required.' });
     }
 
     const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
@@ -90,8 +90,15 @@ router.post('/chat', async (req, res) => {
         if (fileId) {
             messages.push({ "role": "system", "content": `fileid://${fileId}` });
         }
-        
-        messages.push({ "role": "user", "content": message });
+
+        // Map frontend conversation history to AI model format
+        conversationHistory.forEach(msg => {
+            if (msg.sender === 'user') {
+                messages.push({ "role": "user", "content": msg.text });
+            } else if (msg.sender === 'ai') {
+                messages.push({ "role": "assistant", "content": msg.text });
+            }
+        });
 
         const payload = {
             model: "qwen-long",
@@ -105,7 +112,6 @@ router.post('/chat', async (req, res) => {
             }
         });
         
-        // Extract the message content from the response
         const aiResponse = response.data.choices[0].message.content;
         res.json({ response: aiResponse });
 
